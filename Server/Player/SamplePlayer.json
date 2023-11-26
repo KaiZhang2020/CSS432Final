@@ -1,0 +1,10 @@
+{
+    "data": [
+        {
+            "name": "player name",
+            "id": "1",
+            "ip": "111.111.111.111",
+            "Highest Score": "111:22",
+        }
+    ]
+}
