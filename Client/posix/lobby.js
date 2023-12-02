@@ -1,65 +1,80 @@
-const net = require('net');
-const http = require('http');
+// Include required modules
+const net = require('net'); // For TCP connections
+const http = require('http'); // For HTTP connections
 
+// Creating a TCP server using the net module
 const NetServer = net.createServer();
-const sockets = [];
-let players = [];
-let id = 0;
+const sockets = []; // Array to keep track of connected sockets
+let players = []; // Array to store player information
+let id = 0; // Player ID, incremented for each new player
 
+// Ports for TCP and HTTP servers
 const NET_SERVER_PORT = 3001;
 const HTTP_SERVER_PORT = 3000;
 
+// Handling new TCP connections
 NetServer.on('connection', (socket) => {
   console.log('New client request...');
-  sockets.push(socket);
+  sockets.push(socket); // Add the new socket to the sockets array
 
+  // Handling data received from a client
   socket.on('data', (data) => {
-    const message = data.toString().trim();
-    const [action, payload] = message.split(':');
+    const message = data.toString().trim(); // Convert buffer to string and trim it
+    const [action, payload] = message.split(':'); // Split the message into action and payload
     
+    // Adding a new player
     if (action === 'addPlayer') {
       const username = payload;
       if (username) {
-        players.push({ username, id: ++id });
+        players.push({ username, id: ++id }); // Increment ID and add new player
         const playersList = JSON.stringify(players.map(player => player.username));
-        broadcast(playersList);
+        broadcast(playersList); // Broadcast updated players list to all clients
         console.log(username, 'connected!');
       }
-    } else if (action === 'getPlayers') {
+    } 
+    // Sending the players list to a client
+    else if (action === 'getPlayers') {
       const playersList = JSON.stringify(players.map(player => player.username));
-      socket.write(playersList);
+      socket.write(playersList); // Send players list to the requester
     }
   });
 
+  // Handling client disconnection
   socket.on('end', () => {
     console.log('Client disconnected');
     const index = sockets.indexOf(socket);
     if (index !== -1) {
-      sockets.splice(index, 1);
+      sockets.splice(index, 1); // Remove the disconnected socket from the array
     }
     players = players.filter(player => player.sock !== socket.remoteAddress);
     const playersList = JSON.stringify(players.map(player => player.username));
-    broadcast(playersList);
+    broadcast(playersList); // Broadcast updated players list
   });
 
+  // Handling socket errors
   socket.on('error', (err) => {
     console.error('Socket error:', err.message);
   });
 });
 
+// Broadcast a message to all connected sockets
 function broadcast(message) {
   sockets.forEach(socket => {
-    socket.write(message);
+    socket.write(message); // Send the message to each connected client
   });
 }
 
+// Start listening on the specified TCP server port
 NetServer.listen(NET_SERVER_PORT, () => {
   console.log(`Server listening on port ${NET_SERVER_PORT}`);
 });
 
+// Creating an HTTP server using the http module
 const httpServer = http.createServer((req, res) => {
+  // Handling GET requests to the root URL
   if (req.method === 'GET' && req.url === '/') {
     res.writeHead(200, { 'Content-Type': 'text/html' });
+    // Send HTML content to the client
     res.write(`
       <input type='text' id='usernameInput' placeholder='Enter username'>
       <button id='addButton'>Add Username</button>
@@ -113,34 +128,41 @@ const httpServer = http.createServer((req, res) => {
       </script>
     `);
     res.end();
-  } else if (req.method === 'GET' && req.url === '/players') {
+  } 
+  // Handling GET requests for the players list
+  else if (req.method === 'GET' && req.url === '/players') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     const playersList = JSON.stringify(players.map(player => player.username));
-    res.end(playersList);
-  } else if (req.method === 'POST' && req.url === '/addPlayer') {
+    res.end(playersList); // Send the players list as JSON
+  } 
+  // Handling POST requests for adding a new player
+  else if (req.method === 'POST' && req.url === '/addPlayer') {
     let body = '';
     req.on('data', (chunk) => {
-      body += chunk.toString();
+      body += chunk.toString(); // Accumulate the data chunks
     });
     req.on('end', () => {
-      const username = body.slice(9); // Remove 'addPlayer:' prefix
+      const username = body.slice(9); // Extract username from the received data
       if (username) {
-        players.push({ username,id: --id });
+        players.push({ username, id: --id }); // Decrement ID and add new player
         const playersList = JSON.stringify(players.map(player => player.username));
-        broadcast(playersList);
+        broadcast(playersList); // Broadcast updated players list
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(playersList);
+        res.end(playersList); // Send updated players list
       } else {
         res.writeHead(400, { 'Content-Type': 'text/plain' });
-        res.end('Invalid username');
+        res.end('Invalid username'); // Send error response for invalid username
       }
     });
-  } else {
+  } 
+  // Handling all other requests
+  else {
     res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('Not Found');
+    res.end('Not Found'); // Send a 404 response
   }
 });
 
+// Start listening on the specified HTTP server port
 httpServer.listen(HTTP_SERVER_PORT, () => {
   console.log(`HTTP server listening on port ${HTTP_SERVER_PORT}`);
 });
