@@ -1,90 +1,128 @@
-// Include required modules
-const net = require('net'); // For TCP connections
-const http = require('http'); // For HTTP connections
+const net = require('net');
+const http = require('http');
+// const NetClient = new net.Socket();
 
-// Creating a TCP server using the net module
-const NetServer = net.createServer();
-const sockets = []; // Array to keep track of connected sockets
-let players = []; // Array to store player information
-let id = 0; // Player ID, incremented for each new player
+let NetClient = ""// net.createServer();
+// const sockets = [];
+let players = [];
+let id = 0; 
+let username = '🦊 New player!'
 
-// Ports for TCP and HTTP servers
-const NET_SERVER_PORT = 3001;
+const NET_SERVER_PORT  = 3001;
 const HTTP_SERVER_PORT = 3000;
+const IP_ADDR          = 'localhost';
 
-// Handling new TCP connections
-NetServer.on('connection', (socket) => {
-  console.log('New client request...');
-  sockets.push(socket); // Add the new socket to the sockets array
-
-  // Handling data received from a client
-  socket.on('data', (data) => {
-    const message = data.toString().trim(); // Convert buffer to string and trim it
-    const [action, payload] = message.split(':'); // Split the message into action and payload
-    
-    // Adding a new player
-    if (action === 'addPlayer') {
-      const username = payload;
-      if (username) {
-        players.push({ username, id: ++id }); // Increment ID and add new player
-        const playersList = JSON.stringify(players.map(player => player.username));
-        broadcast(playersList); // Broadcast updated players list to all clients
-        console.log(username, 'connected!');
-      }
-    } 
-    // Sending the players list to a client
-    else if (action === 'getPlayers') {
-      const playersList = JSON.stringify(players.map(player => player.username));
-      socket.write(playersList); // Send players list to the requester
-    }
-  });
-
-  // Handling client disconnection
-  socket.on('end', () => {
-    console.log('Client disconnected');
-    const index = sockets.indexOf(socket);
-    if (index !== -1) {
-      sockets.splice(index, 1); // Remove the disconnected socket from the array
-    }
-    players = players.filter(player => player.sock !== socket.remoteAddress);
-    const playersList = JSON.stringify(players.map(player => player.username));
-    broadcast(playersList); // Broadcast updated players list
-  });
-
-  // Handling socket errors
-  socket.on('error', (err) => {
-    console.error('Socket error:', err.message);
-  });
-});
-
-// Broadcast a message to all connected sockets
 function broadcast(message) {
-  sockets.forEach(socket => {
-    socket.write(message); // Send the message to each connected client
+  NetClient.forEach(socket => {
+    socket.write(message);
   });
 }
-
-// Start listening on the specified TCP server port
-NetServer.listen(NET_SERVER_PORT, () => {
-  console.log(`Server listening on port ${NET_SERVER_PORT}`);
-});
-
-// Creating an HTTP server using the http module
+// ---------------------------------------
 const httpServer = http.createServer((req, res) => {
-  // Handling GET requests to the root URL
   if (req.method === 'GET' && req.url === '/') {
+
+    NetClient = new net.Socket();
+    NetClient.connect(NET_SERVER_PORT, IP_ADDR, () => {
+      console.log('Connected to lobby server');
+      NetClient.write(username); // from localhost
+      // console.log('NetClient ->connect-> write:',username);
+    });
+    NetClient.on('data', (data) => {
+      players = JSON.parse(data.toString());
+      console.log('🟡 Current players in the lobby2:', players, 'data:',data);
+    })
+    NetClient.on('error', (err) => {
+      console.error(`🚧 Error with TCP connection: ${err}`);
+      // Handle the error, and possibly close the connection gracefully
+      NetClient.destroy(); // Close the socket immediately to prevent unhandled error crashes
+    });
+    NetClient.on('close', () => {
+      console.log('🏁 Connection to lobby server closed');
+    });
+    // ----------------------------------------
+
+  // Close the connection after receiving data
+  // NetClient.end();
+  
     res.writeHead(200, { 'Content-Type': 'text/html' });
-    // Send HTML content to the client
     res.write(`
-      <input type='text' id='usernameInput' placeholder='Enter username'>
-      <button id='addButton'>Add Username</button>
-      <div id='playerList'>Players List:</div>
+      <div id='FormToReg'>
+        <input type='text' id='usernameInput' placeholder='Enter username'>
+        <br/>
+        <button id='addButton'>Add Username</button>
+      </div>
+      <hr/>
+      <div id='playerListTitile'>Players List:</div>
+      <div id='playerList'>loading...</div>
+      <hr/>
+      <div id='MyName'></div>
+
+      <h1>next!</h1>
+      <button onclick="redirectToNext()">Go to Next Page</button>
+
       <script>
+          function changeContent(elementId, text) {
+            var element = document.getElementById(elementId);
+            if (element) {
+              element.textContent = text;
+            } else {
+              console.log('Element for changeContent(elementId, text) not found');
+            }
+          }
+          const storedValue = sessionStorage.getItem('username');
+
+          const addUserToList = (username) => {
+            if (username) {
+              const xhr = new XMLHttpRequest();
+              xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                  if (xhr.status === 200) {
+                    const players = JSON.parse(xhr.responseText);
+                    updatePlayerList(players);
+                  } else {
+                    console.error('Error adding player:', xhr.status);
+                  }
+                }
+              };
+              xhr.open('POST', '/addPlayer');
+              xhr.setRequestHeader('Content-Type', 'text/plain');
+              xhr.send('addPlayer' + username);
+              removeForm();
+            }
+          }
+          console.log('storedValue',storedValue);
+          if (storedValue?.length>0){
+            changeContent('MyName',('Hello '+storedValue+'!'))
+            addUserToList(storedValue);
+          } else {
+              document.getElementById('addButton').addEventListener('click', (e) => {
+                username = document.getElementById('usernameInput').value;
+                if (username) {
+                  addUserToList(username);
+                  sessionStorage.setItem('username', username);
+                } else {
+                  console.error('Please enter a username');
+                }
+              });
+          }
+
+        function redirectToNext() {
+          window.location.href = '/next';
+        }
         function updatePlayerList(players) {
           const playerList = document.getElementById('playerList');
           playerList.innerHTML = players.map(player => \`<li>\${player}</li>\`).join('');
         }
 
+        // if user entered username in form
+        function removeForm() {
+          const formToRemove = document.getElementById('FormToReg'); // Get the element by ID
+          if (formToRemove) { // Check if the element exists before removing it
+            formToRemove.parentNode.removeChild(formToRemove);  // Remove the element from its parent node
+          } else {
+            console.log('Element of id="FormToReg" not found or already removed');
+          }
+        }
         function getPlayers() {
           const xhr = new XMLHttpRequest();
           xhr.onreadystatechange = function() {
@@ -92,6 +130,7 @@ const httpServer = http.createServer((req, res) => {
               if (xhr.status === 200) {
                 const players = JSON.parse(xhr.responseText);
                 updatePlayerList(players);
+                console.log('players',players)
               } else {
                 console.error('Error fetching players:', xhr.status);
               }
@@ -101,68 +140,75 @@ const httpServer = http.createServer((req, res) => {
           xhr.send();
         }
 
-        document.getElementById('addButton').addEventListener('click', () => {
-          const username = document.getElementById('usernameInput').value;
-          if (username) {
-            const xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function() {
-              if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                  const players = JSON.parse(xhr.responseText);
-                  updatePlayerList(players);
-                } else {
-                  console.error('Error adding player:', xhr.status);
-                }
-              }
-            };
-            xhr.open('POST', '/addPlayer');
-            xhr.setRequestHeader('Content-Type', 'text/plain');
-            xhr.send('addPlayer:' + username);
-          } else {
-            console.error('Please enter a username');
-          }
-        });
-
         setInterval(getPlayers, 5000);
         getPlayers();
       </script>
     `);
     res.end();
-  } 
-  // Handling GET requests for the players list
-  else if (req.method === 'GET' && req.url === '/players') {
+
+  }  else if (req.method === 'GET' && req.url === '/next') {
+    // console.log('NetClient',typeof (NetClient))
+    if ((typeof NetClient)!==undefined) { NetClient?.end();} // works as direct page
+    // NetClient.on('data', (data) => {
+    //   players = JSON.parse(data.toString());
+    //   console.log('🟡 Current players in the lobby2:', players, 'data:',data);
+    // })
+    // Handle redirection after button click
+    res.writeHead(200, { 'Location': '/next','Content-Type': 'text/html' });
+    res.write(`
+      <h1>This is next</h1>
+      <button onclick="redirectToNext()">Go to Main Page</button>
+      <script>
+
+      function redirectToNext() {
+        window.location.href = '/';
+      }
+      </script>
+    `);
+    res.end();
+  
+  } else if (req.method === 'GET' && req.url === '/players') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     const playersList = JSON.stringify(players.map(player => player.username));
-    res.end(playersList); // Send the players list as JSON
-  } 
-  // Handling POST requests for adding a new player
-  else if (req.method === 'POST' && req.url === '/addPlayer') {
+    res.end(playersList);
+    
+  } else if (req.method === 'POST' && req.url === '/addPlayer') {
     let body = '';
-    req.on('data', (chunk) => {
-      body += chunk.toString(); // Accumulate the data chunks
+    // NetClient.write()
+    // NetClient.on('data', (data) => {
+    //   // NetClient.write(username);
+    //   players = JSON.parse(data.toString());
+    //   console.log('🟡Current players in the lobby1:', players);
+    // })
+    req.on('data', (data) => {
+      body += data.toString();
+      console.log('addPlayer data ['+data.toString()+ '] - ', username)
+      // NetClient.write(username);
     });
     req.on('end', () => {
-      const username = body.slice(9); // Extract username from the received data
+      const username = body.slice(9); // Remove 'addPlayer:' prefix
+      console.log('🥶 end username',username)
       if (username) {
-        players.push({ username, id: --id }); // Decrement ID and add new player
-        const playersList = JSON.stringify(players.map(player => player.username));
-        broadcast(playersList); // Broadcast updated players list
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(playersList); // Send updated players list
+        if (!players.includes(username)) {
+          players.push({ username });
+          const playersList = JSON.stringify(players.map(player => player.username));
+          broadcast(playersList);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(playersList);
+          // array.push(newValue);
+        }
       } else {
         res.writeHead(400, { 'Content-Type': 'text/plain' });
-        res.end('Invalid username'); // Send error response for invalid username
+        res.end('Invalid username');
       }
     });
-  } 
-  // Handling all other requests
-  else {
+
+  } else { 
     res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('Not Found'); // Send a 404 response
+    res.end('Not Found!!!');
   }
 });
-
-// Start listening on the specified HTTP server port
+  
 httpServer.listen(HTTP_SERVER_PORT, () => {
   console.log(`HTTP server listening on port ${HTTP_SERVER_PORT}`);
 });
