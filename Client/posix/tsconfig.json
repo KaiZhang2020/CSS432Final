@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es6",
+        "esModuleInterop": true,
+        "types": ["node"] // Make sure 'node' is included in the types array
+    },
+    "include": [
+        "./**/*.ts"
+    ]
+}
