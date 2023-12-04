@@ -71,8 +71,9 @@ class GameRoom {
      * Constructs a new game room instance.
      * @param {Player} host - The player who will act as the host of the game room.
      */
-    constructor(host: Player) {
+    constructor(host: Player, id: string) {
         this.host = host;
+        this.id = id;
         this.isFull = false;
     }
 
