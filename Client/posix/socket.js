@@ -1,5 +1,6 @@
 const net = require('net');
 
+
 class TCPClient {
   constructor() {
     this.client = new net.Socket();
@@ -25,7 +26,7 @@ class TCPClient {
       if (typeof onError === 'function') {  
         console.error(`🚧 Error with TCP connection: ${error}`);
         onError(error); }
-       
+    
         // Handle the error, and possibly close the connection gracefully
         // client.destroy(); // Close the socket immediately to prevent unhandled error crashes
     });
@@ -52,6 +53,7 @@ class TCPClient {
 }
 
 module.exports = TCPClient;
+
 
 // Example usage:
 // const client = new TCPClient();
