@@ -2,7 +2,7 @@
   "name": "pong-css432",
   "version": "1.0.0",
   "description": "",
-  "main": "posix-client.js",
+  "main": "lobby.js",
   "scripts": {
     "lobby": "nodemon lobby.js",
     "tcp": "nodemon tcp-net.js",
