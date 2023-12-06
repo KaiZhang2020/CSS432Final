@@ -1,15 +1,19 @@
+import * as os from 'os';
+
 /**
  * Type definition for a network address with IP and port.
  */
-type NetAddr = {
+export type NetAddr = {
     ip: string;
     port: number;
 }
 
+const GAME_PORT = 35167;
+
 /**
  * Represents a player in the game.
  */
-class Player {
+export class Player {
     /** Unique identifier - username of the player */
     readonly username: string;
     
@@ -31,15 +35,13 @@ class Player {
     /**
      * Constructs a new player instance.
      * @param {string} username - The username of the player.
-     * @param {number} id - The unique identifier for the player.
-     * @param {NetAddr} addr - The network address of the player.
      * @param {boolean} isHost - Flag indicating if the player is the host.
      */
-    constructor(username: string, id: number, addr: NetAddr, isHost: boolean) {
+    constructor(username: string, isHost: boolean) {
         this.username = username;
-        this.id = id;
-        this.addr = addr;
+        this.id = Math.floor(Math.random() * 100000);
         this.isHost = isHost;
+        this.addr = Player.getLocalAddr();
     }
 
     /**
@@ -49,12 +51,23 @@ class Player {
     setScore(score: number) {
         this.score = score;
     }
+
+    static getLocalAddr(): NetAddr {
+        const interfaces = os.networkInterfaces();
+        const addresses = interfaces['wlp2s0'];
+        const address = addresses.find((addr) => addr.family === 'IPv4');
+        const netaddr = {
+            ip: address.address,
+            port: GAME_PORT
+        };
+        return netaddr;
+    }
 }
 
 /**
  * Represents a game room that holds the players and game status.
  */
-class GameRoom {
+export class GameRoom {
     /** Unique identifier of the game room */
     id: string;
     
@@ -91,7 +104,7 @@ class GameRoom {
 /**
  * Type definition for a 2D position with x and y coordinates.
  */
-type Position = {
+export type Position = {
     x: number;
     y: number;
 }
@@ -99,7 +112,7 @@ type Position = {
 /**
  * Class that holds updates of the game such as score and position.
  */
-class GameInfo {
+export class GameInfo {
     /** Score of the host player */
     hostScore: number;
     
@@ -135,7 +148,7 @@ class GameInfo {
 /**
  * Enum for control directions in the game.
  */
-enum ControlDirection {
+export enum ControlDirection {
     UP,
     DOWN
 }
