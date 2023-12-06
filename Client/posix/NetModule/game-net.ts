@@ -9,7 +9,7 @@ class GameNetManager {
     readonly gameRoom: NetStructs.GameRoom;
     readonly isHost: boolean;
 
-    private interface: any;
+    private interfaceConnection: any;
 
     /**
      * Constructor for GameNetManager.
