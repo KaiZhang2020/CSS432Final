@@ -1,11 +1,12 @@
 import * as net from 'net';
+import * as NetStructs from './structs';
 
 /**
  * Manages the network aspect of the Pong game, handling both host and guest roles.
  */
 class GameNetManager {
     private socket: net.Socket;
-    readonly gameRoom: GameRoom;
+    readonly gameRoom: NetStructs.GameRoom;
     readonly isHost: boolean;
 
     private interface: any;
@@ -16,7 +17,7 @@ class GameNetManager {
      * @param gameRoom The game room associated with this network manager.
      * @param isHost A boolean indicating if this instance is for the host or the guest.
      */
-    constructor(gameRoom: GameRoom, isHost: boolean) {
+    constructor(gameRoom: NetStructs.GameRoom, isHost: boolean) {
         this.gameRoom = gameRoom;
         this.isHost = isHost;
 
@@ -62,18 +63,18 @@ class GameNetManager {
 
     /**
      * Processes incoming data from the socket as the host.
-     * The host always will receive data as a ControlDirection object.
+     * The host always will receive data as a netStructs.ControlDirection object.
      * @param data The data received from the guest.
      */
     private processIncomingDataAsHost(data: Buffer) {
-        // Read from the buffer and convert to a ControlDirection object
-        const controlDirection = JSON.parse(data.toString()) as ControlDirection;
+        // Read from the buffer and convert to a netStructs.ControlDirection object
+        const controlDirection = JSON.parse(data.toString()) as NetStructs.ControlDirection;
         switch (controlDirection) {
-            case ControlDirection.UP:
+            case NetStructs.ControlDirection.UP:
                 // TODO: Call the INTERFACE method to move the guest's paddle up
                 // interface.moveGuestPaddleUp();
                 break;
-            case ControlDirection.DOWN:
+            case NetStructs.ControlDirection.DOWN:
                 // TODO: Call the INTERFACE method to move the guest's paddle down
                 // interface.moveGuestPaddleDown();
                 break;
@@ -84,7 +85,7 @@ class GameNetManager {
      * Sends game data over the network to the guest.
      * @param gameData The game data to be sent.
      */
-    public sendGameDataAsHost(gameData: GameInfo) {
+    public sendGameDataAsHost(gameData: NetStructs.GameInfo) {
         const serializedData = JSON.stringify(gameData);
         this.socket.write(serializedData);
     }
@@ -105,11 +106,11 @@ class GameNetManager {
 
     /**
      * Processes incoming data from the socket as the guest.
-     * @param data The data received from the host. This should always be of type GameInfo.
+     * @param data The data received from the host. This should always be of type netStructs.GameInfo.
      */
     private processIncomingDataAsGuest(data: Buffer) {
-        // Read from the buffer and convert to a GameInfo object
-        const gameInfo = JSON.parse(data.toString()) as GameInfo;
+        // Read from the buffer and convert to a netStructs.GameInfo object
+        const gameInfo = JSON.parse(data.toString()) as NetStructs.GameInfo;
         // TODO: Call the INTERFACE method to update the game
         // interface.updateGame(gameInfo);
     }
@@ -118,7 +119,7 @@ class GameNetManager {
      * Sends game data over the network to the host.
      * @param gameData The game data to be sent.
      */
-    public sendGameDataAsGuest(gameData: ControlDirection) {
+    public sendGameDataAsGuest(gameData: NetStructs.ControlDirection) {
         const serializedData = JSON.stringify(gameData);
         this.socket.write(serializedData);
     }
