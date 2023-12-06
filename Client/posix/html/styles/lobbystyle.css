@@ -1,0 +1,264 @@
+@font-face {
+    font-family: 'Dekko';
+    src: url('./fonts/Dekko-Regular.ttf');
+    font-style: normal;
+}
+
+body {
+    background-color: #000000;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    display: flex;
+    align-items: center;
+    margin: 0%;
+}
+
+/*Left side*/
+
+#left {
+    margin: 0%;
+    padding: 10%;
+    width: 30%;
+    background-color: #151618;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    height:90vh;
+}
+
+.leftbox {
+    margin: 0;
+    margin-bottom: 10vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.leftbox h2{
+    text-transform: uppercase;
+    color: #135b75;
+    display: flex;
+    justify-content: center;
+    font-size: 25px;
+    letter-spacing: 0.075em;
+    font-weight: 530;
+    
+}
+
+.sidelist {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    line-height: 1;
+/* [empty list] */
+    color: silver;
+    opacity: 0.5;
+}
+
+.listitem {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.listitem p {
+    color: #26AEDE;
+    margin: 0.5em;
+    margin-left: 0;
+    font-size: 18px;
+}
+
+ /* active player status*/
+
+ .listitem h6 {
+    margin: 0.5em;
+    font-size: 18px;
+    font-weight: 100;
+}
+
+.is-Playing {
+    color: #01c62c;
+}
+
+.in-Lobby {
+    color: #FFEE53;
+}
+
+/*game room button status*/
+
+.listitem button {
+    border-radius: 3.5px;
+    border: none;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    width: 65px;
+    height: 30px;
+    font-size: 18px;
+    font-weight: 50;
+    margin: 10px;
+}
+
+.busy {
+    background-color: transparent;
+    color: red;
+}
+
+.join {
+    background-color: #093002;
+    color:#01C62C; 
+}
+
+/* Right side*/
+
+#right {
+    margin: 0%;
+    padding: 10%;
+    width: 70%;
+    background-color: #191A1C;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    height:90vh;
+}
+
+#title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#title h1 {
+    text-transform: uppercase;
+    font-size: 80px;
+    margin: 0%;
+    color: #26aede;
+    font-family: 'Dekko';
+    font-weight: 25;
+    line-height: 1;
+    text-align: center;
+}
+
+#title h3 {
+    text-transform: uppercase;
+    color: white;
+    margin: 0;
+    font-weight: 25;
+    font-family: 'Dekko';
+    font-size: 30px;
+}
+
+#join-game {
+    margin-top: 10%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#join-game p{
+    margin: 0%;
+    padding-bottom: 10px;
+    color: gray;
+    font-size: 15px;
+}
+
+#join-game h5 {
+    margin: 0%;
+    padding-bottom: 20px;
+    color: white;
+    font-weight: 100;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 20px;
+}
+
+#join-game input {
+    border-radius: 5px;
+    border: none;
+    font-size: 18px;
+    width: 90%;
+    padding: 5px 10px;
+    margin: 8px;
+    box-sizing: border-box;
+    background-color: #99D5EA;
+    box-shadow:inset 0 0 1.5px 1.5px gray;
+}
+
+#join-game button{
+    border-radius: 5px;
+    border: none;
+    background-color: #26AEDE;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    width: 125px;
+    height: 40px;
+    font-size: 20px;
+    font-weight: 550;
+    margin: 10px;
+}
+#FormToReg {
+    text-align: center;
+}
+#FormToReg input{
+    width: 100%;
+    max-width: 250px;
+    height: 40px;
+    text-align: center;
+ }
+#FormToReg #addButton {
+    width: 100%;
+    max-width: 130px;
+}
+#start-game input {
+    border-radius: 5px;
+    border: none;
+    background-color: #26AEDE;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    width: 250px;
+    height: 40px;
+    font-size: 20px;
+    font-weight: 550;
+    margin: 10px;
+    cursor: pointer;
+    transition: 0.5s ease;
+}
+#start-game input:hover {
+    background-color: #4ac373;
+}
+#start-game input:active {
+    background-color: #4ac373;
+}
+button {
+    cursor: pointer;
+}
+.otherButtons button {
+    background-color: #151618 !important;
+    border: 2px solid #26AEDE !important;
+    color: #26AEDE;
+    font-weight: 100 !important;
+    font-size: 18px !important;
+    width: 140px !important;
+    height: 40px !important;
+    border-radius: 3px !important;
+    opacity: 0.6;
+    margin-bottom: 10px;
+    transition: 0.5s ease;
+}
+.otherButtons #Scoreboard{
+    margin-top: 80px;
+}
+.otherButtons button:hover {
+    opacity: 1;
+}
+.otherButtons button#Exit:hover {
+    color: #db2929;
+    border-color: #db2929 !important;
+}
+.otherButtons button#Exit:active {
+    color: #db2929;
+    border-color: #db2929 !important;
+}
