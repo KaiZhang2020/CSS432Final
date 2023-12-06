@@ -1,0 +1,58 @@
+*, *::after, *::before {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background-color: #191A1C;
+}
+
+.paddle {
+    --position:50;
+    top: calc(var(--position) * 1vh);
+    position: absolute;
+    background-color: antiquewhite;
+    width: 1vh;
+    height: 10vh;
+}
+
+#player-one-paddle {
+    left: 1vw;
+}
+
+#player-two-paddle {
+    right: 1vw;
+}
+
+.ball {
+    --x: 50;
+    --y: 50;
+
+    --position: absolute;
+    left: calc(var(--x) * 1vw);
+    top: calc(var(--y) * 1vh);
+    position: absolute;
+    border-radius: 50%;
+    background-color: antiquewhite;
+    width: 2.5vh;
+    height: 2.5vh;
+}
+
+.score {
+    display: flex;
+    justify-content: center;
+    font-size: 45px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.score > * {
+    padding: 10px;
+    flex-grow: 1;
+    flex-basis: 0;
+    opacity: 50%;
+}
+
+.score > :first-child{
+    text-align: right;
+    border-right: .5vh solid antiquewhite;
+}
