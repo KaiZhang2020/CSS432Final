@@ -33,21 +33,23 @@ const handleRootRequest = (req, res) => {
 }
 // '/add' 
 const addUserHandler = (username, players) => {
-  if (players?.length === 0 || !players.includes(username)) {
-    players.push(username);
-    // nickname = decodeURIComponent(body.split(':')[1]);
-    let TCPclient = new TCPClient();
-    TCPclient.connect(
-        NET_SERVER_PORT, // Port
-        IP_ADDR, // Host
-        () => { TCPclient.send(`{"addPlayer":"${username}"}`); },
-        () => { console.log('Connection closed /add'); },
-        (error) => { console.error('Connection error /add:', error); }
-    );
+  setTimeout(() => {
+    if (players?.length === 0 || !players.includes(username)) {
+      players.push(username);
+      // nickname = decodeURIComponent(body.split(':')[1]);
+      let TCPclient = new TCPClient();
+      TCPclient.connect(
+          NET_SERVER_PORT, // Port
+          IP_ADDR, // Host
+          () => { TCPclient.send(`{"addPlayer":"${username}"}`); },
+          () => { console.log('Connection closed /add'); },
+          (error) => { console.error('Connection error /add:', error); }
+      );
     // res.writeHead(200, { 'Content-Type': 'text/plain' });
     // res.end(JSON.stringify(players));
     // res.end();
   } 
+  }, 1000);
 }
 const handleAddRequest = (req, res) => {
   let body = '';
@@ -103,10 +105,14 @@ const handleVisibilityStateRequest = (req, res) => {
   req.on('end', () => {
     const { visibilityState, username, page } = JSON.parse(body);
     if (username !== null){
-      // console.log(username, 'is', visibilityState,'on',page);
+      console.log(username, 'is', visibilityState,'on',page);
       // ---------------  if visible -> add from list
-      if (visibilityState === 'visible' && username !== null) {
-        addUserHandler(username, players);
+      if (visibilityState === 'visible' && username !== null && page == 'lobby') {
+
+          addUserHandler(username, players);
+      }
+      else if (visibilityState === 'visible' && username !== null) {
+          addUserHandler(username, players);
       }
       // ---------------  if hidden -> remove from list
       else if (visibilityState === 'hidden' && username !== null) {
@@ -180,9 +186,9 @@ const handleRoomId = (req, res) => {
       const message = (JSON.stringify(data)?.charAt(0)==='{'||JSON.stringify(data)?.charAt(0)==='[')? JSON.parse(data):data;
 
       if (message?.rooms){
-          const players = getPlayers(message.rooms,roomID);
-          user1 = players?.user1;
-          user2 = players?.user2;
+          const users = getPlayers(message.rooms,roomID);
+          user1 = users?.user1;
+          user2 = users?.user2;
           // console.log('user1,user2',user1,user2)
 
       } else {

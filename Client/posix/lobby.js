@@ -12,7 +12,7 @@ const { handleRootRequest,
         handleGetPlayers, // get
       } = require('./handlers/requestHandlers.js');
 
-const LAN_IP_ADDRESS = '192.168.0.3'; // LAN: http://192.168.0.3:3000/
+const LAN_IP_ADDRESS = '10.195.232.188'; // LAN: http://192.168.0.3:3000/
 const HTTP_SERVER_PORT = 3000;
 
 const server = http.createServer((req, res) => {

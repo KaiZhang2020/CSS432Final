@@ -1,7 +1,6 @@
 const net = require('net');
 const { v4: uuidv4 } = require('uuid');
 
-
 const NetServer = net.createServer();
 let sockets = []; // Store connected client sockets
 let players = [];
@@ -34,18 +33,45 @@ function findAndUpdateUserLocation(username, newLocation) {
       console.log(`🔵 ${username} location updated to ${newLocation}.`);
     } 
     return players[userIndex];
+    // else { return `User ${username} not found.`; }
 }
 // Function to update players in a room by roomID
 function updatePlayersInRoom(roomID, updatedPlayers) {
     const roomToUpdate = rooms.find(room => room.roomID === roomID);
+    // findAndUpdateUserLocation()
     if (roomToUpdate) {
+        console.log('🦄roomToUpdate',roomToUpdate)
       roomToUpdate.players = updatedPlayers;
+      roomToUpdate.playerCounter = 2;
+      // roomToUpdate.nickname = updatedNickname;
     } else {
+        // console.log('🦄rooms NOTFOUND',rooms)
       console.log('Room not found');
     }
     return roomToUpdate;
 }
-
+function isPlayerInRoom(username) {
+    return players.some(player => player.username === username && player.currentLocation === 'room');
+}
+function removePlayerFromRooms(username) {
+    rooms.forEach(room => {
+      if (room.players.user1 === username) {
+        console.log('🧸 found[user1]')
+        room.players.user1 = '';
+        room.playerCounter--;
+        
+      } else if (room.players.user2 === username) {
+        console.log('🧸 found[user2]')
+        room.players.user2 = '';
+        room.playerCounter--;
+      }
+    //   IF no players left, room is removed from array
+      if (room.playerCounter <= 0) {
+        console.log('🧸 [playerCounter]',room.playerCounter)
+        rooms = rooms.filter(r => r !== room);
+      }
+    });
+}
   
 // bind 
 NetServer.on('connection', (socket) => {
@@ -55,44 +81,62 @@ NetServer.on('connection', (socket) => {
   
     socket.on('data', (data) => {
     const message = JSON.parse(data.toString());
+    // console.log('🍉>', message);
     const action = Object.keys(message)[0];
     const payload = message[action];
     
     // ----------add player----------
     if (action === 'addPlayer') { // {"addPlayer":"wert"}
         const username = payload;
-        const matchFound =  players.length > 0 && players.some(player => player.username === username);
-        if (username && !matchFound) {
-            players.push({ 
-                sock: socket.remoteAddress, 
-                username, 
-                currentLocation: 'lobby',
-                id: countPeople, 
-            });
-            // broadcast('ok');
-        } else {
-            // not a ner user
-            findAndUpdateUserLocation(payload, 'room')
-        }
+        console.log('🎾 addPlayer 1000',username)
+        // if (room)
+        setTimeout(() => {
+                // console.log('🎾');
+            const matchFound =  players.length > 0 && players.some(player => player.username === username);
+            if (username && !matchFound) {
+                players.push({ 
+                    sock: socket.remoteAddress, 
+                    username, 
+                    currentLocation: 'lobby',
+                    id: countPeople, 
+                });
+                // const playersList = JSON.stringify(players.map(player => player.username));
+                // broadcast('ok');
+            } else {
+                // not a ner user
+                // console.log('findAndUpdateUserLocation(payload, "lobby")',findAndUpdateUserLocation(payload, 'lobby'))
+                findAndUpdateUserLocation(payload, 'room')
+            }
+        }, 1000);
         console.log('🐳addPlayer:players',players)
 
     }
     // ----------remove player----------
     else if (action === 'removePlayer') { // {"addPlayer":"wert"}
         const username = payload;
+
         const matchFound =  players.length > 0 && players.some(player => player.username === username);
-        if (username && matchFound) {
-            players =  players.filter(user => user.username !== username);
-            console.log('👍',players?.length+' removed, remains', players)
+
+        if (isPlayerInRoom(username)){
+            removePlayerFromRooms(username); // clean rom's data
+            
         } else {
-            console.log('⛔️',username+' cant be removed')
+            if (username && matchFound) {
+                players =  players.filter(user => user.username !== username);
+                console.log('👍',players?.length+' removed, remains', players)
+            } else {
+                console.log('⛔️',username+' cant be removed')
+            }
         }
         socket.end('Closing the socket');
     }
     // ----------get players----------
     else if (action === 'getPlayers') {
         const playersList = JSON.stringify(players.map(player => player.username));
-
+        // console.log('TCP:playersList',playersList)
+        // const allData = JSON.stringify(dataStorage)
+        
+        // console.log('TCP:🦄',allData)
         socket.write(playersList);
 
         console.log('getPlayer:players',players)
@@ -137,13 +181,18 @@ NetServer.on('connection', (socket) => {
                 }}
             socket.write(JSON.stringify(info));
             rooms.push(info);
-       } 
+            // updadting player's location 
+            // findAndUpdateUserLocation(payload,'room');
+            // socket.write(JSON.stringify(`⚪️ Waiting for second player... ${payload} - ID ${roomID} - wait ${JSON.stringify(waitingQueue)}`));
+        } 
         // already one in queue
         else if (waitingQueue.length === 2) {
             const updatedPlayers = { 
                 user1: waitingQueue.shift(),
                 user2: waitingQueue.shift()
             }; 
+            // const updatedPlayer = waitingQueue.shift(); // Updated players object
+        
             const updaterRoom = updatePlayersInRoom(roomID, updatedPlayers);
             isTwoPlayers = 2;
             // findAndUpdateUserLocation(payload,'room');
@@ -153,6 +202,8 @@ NetServer.on('connection', (socket) => {
             socket.write(`???... ${payload} - ID ${roomID}`);
         }
         console.log('waitingQueue',waitingQueue,'isTwoPlayers:',isTwoPlayers, 'roomID',roomID,rooms)
+        // const user1 = waitingQueue.shift();
+        // const user2 = { , nickname };
 
     } 
     //   ---------roomID----------------
@@ -160,6 +211,7 @@ NetServer.on('connection', (socket) => {
         socket.write(JSON.stringify({rooms,players}))
     }
     });
+    // sockets.forEach(e=>console.log('⚪️',sockets))
     socket.on('end', () => {
         // remove from playersList
         // --countPeople;
