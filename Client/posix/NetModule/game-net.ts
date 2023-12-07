@@ -4,7 +4,7 @@ import * as NetStructs from './structs';
 /**
  * Manages the network aspect of the Pong game, handling both host and guest roles.
  */
-class GameNetManager {
+export class GameNetManager {
     private socket: net.Socket;
     readonly gameRoom: NetStructs.GameRoom;
     readonly isHost: boolean;
@@ -47,9 +47,6 @@ class GameNetManager {
             this.socket = socket;
             this.setupSocketListeners();
             console.log('Guest connected!');
-
-            // TODO: Stop broadcasting the room
-            // Matchmaking.stopBroadcastingRoom(this.gameRoom.id);
 
             // TODO: Call the INTERFACE method to start the game
             // const interface = Interface.startGame(this);
