@@ -1,5 +1,6 @@
 import dgram from 'dgram';
 import * as NetStructs from './structs';
+import { GameNetManager } from './game-net';
 
 const BROADCAST_ADDRESS = '255.255.255.255';
 const BROADCAST_PORT = 21348;
@@ -12,6 +13,8 @@ type JoinRequest = {
 export class LanMatchmaking {
     private udpSocket: dgram.Socket;
     private player: NetStructs.Player;
+
+    private gameRoom: NetStructs.GameRoom | null = null;
 
     private onFoundGameRoomCallback: OnFoundGameRoomCallback;
     private broadcastInterval: NodeJS.Timeout | null = null;
@@ -29,14 +32,16 @@ export class LanMatchmaking {
             }
         });
 
-        this.udpSocket.on('message', (msg, rinfo) => {
-            // General message handling logic here
-        });
+        if (this.player.isHost) {
+            this.startBroadcasting(this.gameRoom);
+        }
     }
 
     // ------------------------------------- HOST -------------------------------------
 
     public broadcastRoomAsHost(gameRoom: NetStructs.GameRoom) {
+        this.gameRoom = gameRoom;
+
         const message = Buffer.from(JSON.stringify(gameRoom));
         this.udpSocket.send(message, 0, message.length, BROADCAST_PORT, BROADCAST_ADDRESS, (err) => {
             if (err) console.error('Broadcast error:', err);
@@ -49,7 +54,15 @@ export class LanMatchmaking {
         this.udpSocket.on('message', (msg, rinfo) => {
             try {
                 const joinRequest = JSON.parse(msg.toString()) as JoinRequest;
-                // Process the join request
+                // Check if the join request is for this game room and if the game room is not full
+                if (joinRequest.gameRoomId === this.gameRoom?.id && !this.gameRoom.isFull) {
+                    // Set the guest of the game room
+                    this.gameRoom.setGuest(joinRequest.guest);
+                    // Stop broadcasting the game room
+                    this.stopBroadcasting();
+                    // KICKSTART the GameNet module
+                    const gameNet = new GameNetManager(this.gameRoom, true);
+                }
             } catch (e) {
                 console.error('Error parsing join request:', e);
             }
@@ -75,7 +88,7 @@ export class LanMatchmaking {
         this.onFoundGameRoomCallback = callback;
     }
 
-    private sendJoinRequestAsGuest(gameRoomId: string) {
+    sendJoinRequestAsGuest(gameRoomId: string) {
         const joinRequest: JoinRequest = {
             guest: this.player,
             gameRoomId: gameRoomId
