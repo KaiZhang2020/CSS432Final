@@ -10,6 +10,11 @@ type JoinRequest = {
     gameRoomId: string;
 }
 
+/**
+ * Class LanMatchmaking handles LAN matchmaking for the PONG game.
+ * It supports both host and guest modes, allowing for broadcasting game rooms
+ * and handling join requests.
+ */
 export class LanMatchmaking {
     private udpSocket: dgram.Socket;
     private player: NetStructs.Player;
@@ -19,10 +24,15 @@ export class LanMatchmaking {
     private onFoundGameRoomCallback: OnFoundGameRoomCallback;
     private broadcastInterval: NodeJS.Timeout | null = null;
 
+    /**
+     * Constructs a new LanMatchmaking instance.
+     * @param owner The player who owns this matchmaking instance.
+     */
     constructor(owner: NetStructs.Player) {
         this.udpSocket = dgram.createSocket('udp4');
         this.player = owner;
 
+        // Initialize and configure the UDP socket
         this.udpSocket.bind(BROADCAST_PORT, () => {
             this.udpSocket.setBroadcast(true);
             if (this.player.isHost) {
@@ -32,6 +42,7 @@ export class LanMatchmaking {
             }
         });
 
+        // Start broadcasting if the player is a host
         if (this.player.isHost) {
             this.startBroadcasting(this.gameRoom);
         }
@@ -39,6 +50,10 @@ export class LanMatchmaking {
 
     // ------------------------------------- HOST -------------------------------------
 
+    /**
+     * Broadcasts the game room information as a host.
+     * @param gameRoom The game room to be broadcasted.
+     */
     public broadcastRoomAsHost(gameRoom: NetStructs.GameRoom) {
         this.gameRoom = gameRoom;
 
@@ -49,6 +64,9 @@ export class LanMatchmaking {
         });
     }
 
+    /**
+     * Starts listening for join requests as a host.
+     */
     private listenAsHost() {
         // Listen for join requests
         this.udpSocket.on('message', (msg, rinfo) => {
@@ -69,12 +87,19 @@ export class LanMatchmaking {
         });
     }
 
+    /**
+     * Starts broadcasting the game room at regular intervals.
+     * @param gameRoom The game room to be broadcasted.
+     */
     private startBroadcasting(gameRoom: NetStructs.GameRoom) {
         this.broadcastInterval = setInterval(() => {
             this.broadcastRoomAsHost(gameRoom);
         }, 5000);
     }
 
+    /**
+     * Stops broadcasting the game room.
+     */
     private stopBroadcasting() {
         if (this.broadcastInterval) {
             clearInterval(this.broadcastInterval);
@@ -84,10 +109,18 @@ export class LanMatchmaking {
 
     // ------------------------------------- GUEST -------------------------------------
 
+    /**
+     * Sets the callback function to be called when a game room is found.
+     * @param callback The callback function.
+     */
     public setOnFoundGameRoomCallback(callback: OnFoundGameRoomCallback) {
         this.onFoundGameRoomCallback = callback;
     }
 
+    /**
+     * Sends a join request as a guest to a specific game room.
+     * @param gameRoomId The ID of the game room to join.
+     */
     sendJoinRequestAsGuest(gameRoomId: string) {
         const joinRequest: JoinRequest = {
             guest: this.player,
@@ -101,6 +134,9 @@ export class LanMatchmaking {
         });
     }
 
+    /**
+     * Starts listening for broadcasts of game rooms as a guest.
+     */
     private listenAsGuest() {
         // Listen for broadcasts of game rooms
         this.udpSocket.on('message', (msg, rinfo) => {
@@ -114,6 +150,9 @@ export class LanMatchmaking {
     }
 }
 
+/**
+ * Type definition for the callback function to be called when a game room is found.
+ */
 interface OnFoundGameRoomCallback {
     (gameRoom: NetStructs.GameRoom): void;
 }
