@@ -127,12 +127,13 @@ return `
     });
     
     setInterval(()=> {
+        // const username = sessionStorage.getItem('username'); // sessionStorage
+        // if (username) {
+        //     console.log('🟡',username)
+        //     httpRequests.addUserToList(username)
+        // }
         httpRequests.getStorage();
-        const username = sessionStorage.getItem('username'); // sessionStorage
-        if (username) {
-            httpRequests.sendVisibilityState(storedValue,'lobby')
-        }
-    }, 5000);
+    }, 2000);
 </script>
 `
 }
