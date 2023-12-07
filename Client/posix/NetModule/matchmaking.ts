@@ -4,6 +4,7 @@ import { GameNetManager } from './game-net';
 
 const BROADCAST_ADDRESS = '255.255.255.255';
 const BROADCAST_PORT = 21348;
+const BROADCAST_INTERVAL = 2500;
 
 type JoinRequest = {
     guest: NetStructs.Player;
@@ -94,7 +95,7 @@ export class LanMatchmaking {
     private startBroadcasting(gameRoom: NetStructs.GameRoom) {
         this.broadcastInterval = setInterval(() => {
             this.broadcastRoomAsHost(gameRoom);
-        }, 5000);
+        }, BROADCAST_INTERVAL);
     }
 
     /**
@@ -121,7 +122,7 @@ export class LanMatchmaking {
      * Sends a join request as a guest to a specific game room.
      * @param gameRoomId The ID of the game room to join.
      */
-    sendJoinRequestAsGuest(gameRoomId: string) {
+    public sendJoinRequestAsGuest(gameRoomId: string) {
         const joinRequest: JoinRequest = {
             guest: this.player,
             gameRoomId: gameRoomId
