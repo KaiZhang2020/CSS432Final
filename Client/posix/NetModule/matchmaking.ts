@@ -55,7 +55,7 @@ export class LanMatchmaking {
      * Broadcasts the game room information as a host.
      * @param gameRoom The game room to be broadcasted.
      */
-    public broadcastRoomAsHost(gameRoom: NetStructs.GameRoom) {
+    private broadcastRoomAsHost(gameRoom: NetStructs.GameRoom) {
         this.gameRoom = gameRoom;
 
         const message = Buffer.from(JSON.stringify(gameRoom));
