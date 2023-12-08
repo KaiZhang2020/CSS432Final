@@ -5,6 +5,7 @@
 body {
     margin: 0;
     background-color: #191A1C;
+    overflow: hidden;
 }
 
 .paddle {

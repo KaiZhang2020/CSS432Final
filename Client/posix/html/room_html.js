@@ -1,7 +1,7 @@
 // <script src="./game/game.js" type="module"></script>
 // <link rel="stylesheet" href="game.css">
-const RoomHTML = (roomID,user1,user2,HttpRequests) =>
-`<!DOCTYPE html>
+const RoomHTML = (roomID, user1, user2, HttpRequests) =>
+    `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -13,16 +13,16 @@ const RoomHTML = (roomID,user1,user2,HttpRequests) =>
     <div class="score">
         <div id='user1'>
             <p>${user1}</p>
-            <h2 id="player-one-score">0</h2>
+            <h2 id="Host-score">0</h2>
         </div>
         <div id='user2'>
             <p>${user2}</p>
-            <h2 id="player-two-score">0</h2>
+            <h2 id="Guest-score">0</h2>
         </div>
     </div>
     <div class="ball" id="ball"></div>
-    <div class="paddle" id="player-one-paddle"></div>
-    <div class="paddle" id="player-two-paddle"></div>
+    <div class="paddle" id="Host-paddle"></div>
+    <div class="paddle" id="Guest-paddle"></div>
 
     <script>
         class Ball {
