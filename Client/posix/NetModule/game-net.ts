@@ -9,7 +9,7 @@ export class GameNetManager {
     readonly gameRoom: NetStructs.GameRoom;
     readonly isHost: boolean;
 
-    private interfaceConnection: any;
+    private uiConnection: any;
 
     /**
      * Constructor for GameNetManager.
@@ -49,8 +49,8 @@ export class GameNetManager {
             console.log('Guest connected!');
 
             // TODO: Call the INTERFACE method to start the game
-            // const interface = Interface.startGame(this);
-            // this.interface = interface;
+            // const uiConnection = UI.startGame(this);
+            // this.uiConnection = uiConnection;
         });
 
         server.listen(this.gameRoom.host.addr.port, this.gameRoom.host.addr.ip, () => {
@@ -69,11 +69,11 @@ export class GameNetManager {
         switch (controlDirection) {
             case NetStructs.ControlDirection.UP:
                 // TODO: Call the INTERFACE method to move the guest's paddle up
-                // interface.moveGuestPaddleUp();
+                // uiConnection.moveGuestPaddleUp();
                 break;
             case NetStructs.ControlDirection.DOWN:
                 // TODO: Call the INTERFACE method to move the guest's paddle down
-                // interface.moveGuestPaddleDown();
+                // uiConnection.moveGuestPaddleDown();
                 break;
         }
     }
@@ -109,7 +109,7 @@ export class GameNetManager {
         // Read from the buffer and convert to a netStructs.GameInfo object
         const gameInfo = JSON.parse(data.toString()) as NetStructs.GameInfo;
         // TODO: Call the INTERFACE method to update the game
-        // interface.updateGame(gameInfo);
+        // uiConnection.updateGame(gameInfo);
     }
 
     /**
