@@ -1,5 +1,6 @@
 import * as net from 'net';
 import * as NetStructs from './structs';
+import * as GameInterface from '../html/game/game';
 
 /**
  * Manages the network aspect of the Pong game, handling both host and guest roles.

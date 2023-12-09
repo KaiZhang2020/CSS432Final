@@ -9,34 +9,46 @@ const GuestScore = document.getElementById("Guest-score")
 
 let lastTime
 
-function update(time) {
-    if (lastTime != null) {
-        //update
-        const delta = time - lastTime
-        ball.update(delta, [hostPaddle, guestPaddle])
-
-        if (isOver()) {
-
-        }
+export default class GameInterface {
+    constructor() {
+        window.requestAnimationFrame(update)
     }
-    lastTime = time
-    window.requestAnimationFrame(update)
+
+    getGuestPosition(position) {
+        guestPaddle.position = position
+    }
+
+    sendPositionData() {
+        return hostPaddle.position
+    }
+
+    update(time) {
+        if (lastTime != null) {
+            if ((parseInt(GuestScore.textContent) + parseInt(HostScore.textContent)) >= 5) {
+                //game over
+            }
+            //update
+            const delta = time - lastTime
+            ball.update(delta, [hostPaddle, guestPaddle])
+
+            isOver()
+        }
+        lastTime = time
+        window.requestAnimationFrame(update)
+    }
 }
 
-window.requestAnimationFrame(update)
+
+
+
+
+
 
 document.addEventListener("mousemove", e => {
     hostPaddle.position = (e.y / window.innerHeight) * 100
-    sendPosition(hostPaddle.position)
 })
 
-function recvGuestPosition(position) {
-    guestPaddle.position = position
-}
 
-function sendPositionData(position) {
-
-}
 
 function isOver() {
     const rect = ball.rect
