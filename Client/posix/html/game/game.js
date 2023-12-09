@@ -1,5 +1,6 @@
 import Ball from './Ball.js'
 import Paddle from './Paddle.js'
+import exit from '../exit.js'
 
 const ball = new Ball(document.getElementById("ball"))
 const hostPaddle = new Paddle(document.getElementById("Host-paddle"))
@@ -11,10 +12,10 @@ let lastTime
 
 export default class GameInterface {
     constructor() {
-        window.requestAnimationFrame(update)
+        window.requestAnimationFrame(update)// game start
     }
 
-    getGuestPosition(position) {
+    setGuestPosition(position) {
         guestPaddle.position = position
     }
 
@@ -25,6 +26,7 @@ export default class GameInterface {
     update(time) {
         if (lastTime != null) {
             if ((parseInt(GuestScore.textContent) + parseInt(HostScore.textContent)) >= 5) {
+
                 //game over
             }
             //update
@@ -36,13 +38,17 @@ export default class GameInterface {
         lastTime = time
         window.requestAnimationFrame(update)
     }
+
+    moveGuestPaddleUp() {
+        guestPaddle.position //
+    }
+
+    moveGuestPaddleDown() {
+        guestPaddle.position //
+    }
 }
 
-
-
-
-
-
+window.requestAnimationFrame(update)
 
 document.addEventListener("mousemove", e => {
     hostPaddle.position = (e.y / window.innerHeight) * 100

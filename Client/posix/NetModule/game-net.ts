@@ -10,7 +10,7 @@ export class GameNetManager {
     readonly gameRoom: NetStructs.GameRoom;
     readonly isHost: boolean;
 
-    private uiConnection: any;
+    private UI: GameInterface;
 
     /**
      * Constructor for GameNetManager.
@@ -50,6 +50,8 @@ export class GameNetManager {
             console.log('Guest connected!');
 
             // TODO: Call the INTERFACE method to start the game
+            const UI = GameInterface(); //should start the game
+            this.UI = UI;
             // const uiConnection = UI.startGame(this);
             // this.uiConnection = uiConnection;
         });
@@ -109,6 +111,7 @@ export class GameNetManager {
     private processIncomingDataAsGuest(data: Buffer) {
         // Read from the buffer and convert to a netStructs.GameInfo object
         const gameInfo = JSON.parse(data.toString()) as NetStructs.GameInfo;
+        this.UI.setGuestPosition(data);
         // TODO: Call the INTERFACE method to update the game
         // uiConnection.updateGame(gameInfo);
     }
