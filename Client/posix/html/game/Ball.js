@@ -1,6 +1,7 @@
 export default class Ball {
     constructor(ballElem) {
         this.ballElem = ballElem
+        this.reset()
     }
 
     get x() {
@@ -21,10 +22,10 @@ export default class Ball {
     }
 
     rect() {
-        return this.ballElem.getBounds()
+        return this.ballElem.getBoundingClientRect()
     }
 
-    update(delta) {
+    update(delta, paddleRects) {
         this.x += this.direction.x * this.velocity * delta
         this.y += this.direction.y * this.velocity * delta
         const rect = this.rect()
@@ -36,13 +37,17 @@ export default class Ball {
         if (rect.right >= window.innerWidth || rect.left <= 0) {
             this.direction.x *= -1
         }
+
+        if (paddleRects.some(r => isCollision(r, rect))) {
+            this.direction.x *= -1
+        }
     }
 
     reset() {
         this.x = 50;
         this.y = 50;
         this.direction = { x: 0 }
-        while (this.direction.x <= .2 || this.direction.x >= .9) {
+        while (Math.abs(this.direction.x <= .2) || Math.abs(this.direction.x >= .9)) {
             const heading = randomNumGen(0, 2 * Math.PI)
             this.direction = { x: Math.cos(heading), y: Math.sin(heading) }
         }
@@ -53,4 +58,13 @@ export default class Ball {
 
 function randomNumGen(min, max) {
     return Math.random() * (max - min) + min
+}
+
+function isCollision(rect1, rect2) {
+    return (
+        rect1.left <= rect2.right &&
+        rect1.right >= rect2.left &&
+        rect1.top <= rect2.bottom &&
+        rect1.bottom >= rect2.top
+    )
 }

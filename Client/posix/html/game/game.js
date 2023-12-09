@@ -12,6 +12,9 @@ let lastTime
 function update(time) {
     if (lastTime != null) {
         //update
+        const delta = time - lastTime
+        ball.update(delta, [hostPaddle, guestPaddle])
+
         if (isOver()) {
 
         }
@@ -27,16 +30,22 @@ document.addEventListener("mousemove", e => {
     sendPosition(hostPaddle.position)
 })
 
-function sendPosition(position) {
+function recvGuestPosition(position) {
+    guestPaddle.position = position
+}
+
+function sendPositionData(position) {
 
 }
 
 function isOver() {
+    const rect = ball.rect
     if (rect.right >= window.innerWidth) {
         HostWin()
     } else if (rect.left <= 0) {
         GuestWin()
     }
+    ball.reset()
 }
 
 function HostWin() {
