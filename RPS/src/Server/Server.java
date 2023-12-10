@@ -32,29 +32,29 @@ public class Server {
                 try {
                     server.setSoTimeout(500); // Will be blocked for 500ms upon accept
                     Socket client = server.accept(); // Accept a new connection
-
-                    // Add the new connection into a list of existing connections
-                    PlayerConnection conn = new PlayerConnection(client);
-                    connections.add(conn);
-                    System.out.println("Added connection: " + conn.getName());
-                    
-                    // Send Landing screen to connection: list out availible players
-                    String Landing = "Welcome " + conn.getName() + " Please choose a player to play with";
-                    for(int i = 0; i < connections.size(); i++){
-                        Landing = "ID: " + i + " name: " + conn.getName() + "\n";
-                    }
-                    conn.writeMessage(Landing);
-
-                    // Read a new message from the connection
-                    for (PlayerConnection player:connections) {
-                        String message = player.readMessage();
-                        parseLobbyMessage(player, message);
+                    if(client == null){
+                        continue;
+                    }else{
+                        // Add the new connection into a list of existing connections
+                        PlayerConnection conn = new PlayerConnection(client);
+                        connections.add(conn);
+                        System.out.println("Added connection: " + conn.getName());
+                        // Send landing screen to connection: list out available players
+                        String landingMsg = "Welcome " + conn.getName() + " Please choose a player to play with" + "\n";
+                        for(int i = 0; i < connections.size(); i++){
+                            landingMsg += "ID: " + i + " name: " + connections.get(i).getName() + "\n";
+                        }
+                        conn.writeMessage(landingMsg);
                     }
                 } catch (SocketTimeoutException e) {
                     // Handle timeout exception if needed
                 }
-
                 
+                // Read a new message from the connection
+                for (PlayerConnection player:connections) {
+                    String message = player.readMessage();
+                    parseLobbyMessage(player, message);
+                }
             }
             // Note: server.close(); is not called, as the loop is infinite
         } catch (IOException e) {
@@ -65,9 +65,11 @@ public class Server {
     /**
      * Scoreboard
      */
-    public void generateScoreBoard() {
+    public static void generateScoreBoard() {
+        Collections.sort(connections, new PlayerScoreComparator());
         for(PlayerConnection conn: connections){
             System.out.println("Player: " + conn.getName()+ ": " + conn.getScore());
+            conn.writeMessage("Player: " + conn.getName()+ ": " + conn.getScore());
         }
     }
 
@@ -82,7 +84,7 @@ public class Server {
 
     private static void parseLobbyMessage(PlayerConnection player, String message) {
         boolean isMsgChat = false;
-
+        System.out.println("Checking " + player.getName());
         // Read a new message from the connection
         if (message == null) {
             return;
@@ -90,6 +92,7 @@ public class Server {
             // Try to convert the message to an integer
             try {
                 int roomMsg = Integer.parseInt(message);
+                //System.out.println(roomMsg);
                 if (roomMsg >= 1 && roomMsg < MAX_GAMES) {
                     // Add the player to the game
                     games.get(roomMsg).addPlayer(player);
@@ -99,7 +102,9 @@ public class Server {
                     player.writeMessage("You may close your console safely");
                     System.out.println("Player quit");
                     connections.remove(player);
-                } else {
+                } else if(roomMsg == 0){
+                    generateScoreBoard();
+                } else{
                     isMsgChat = true;
                 }
             } catch (NumberFormatException e) {

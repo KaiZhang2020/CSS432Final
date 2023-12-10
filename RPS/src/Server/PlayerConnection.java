@@ -8,6 +8,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class PlayerConnection {
     private Socket socket;
+    private InputStream rawIn;    // a byte-stream input from client
+    private OutputStream rawOut;  // a byte-stream output to client
     private DataInputStream in;
     private DataOutputStream out;
     private String name;
@@ -23,12 +25,14 @@ public class PlayerConnection {
      * @throws IOException If an I/O error occurs when creating the input and output streams.
      */
     public PlayerConnection(Socket client) throws IOException {
-        this.socket = client;
+        socket = client;
 
         try {
-            this.in = new DataInputStream(client.getInputStream());
-            this.out = new DataOutputStream(client.getOutputStream());
-            this.name = in.readUTF();
+            rawIn = socket.getInputStream();    // a byte-stream input from client
+            rawOut = socket.getOutputStream();  // a byte-stream output to client
+            in = new DataInputStream(rawIn);
+            out = new DataOutputStream(rawOut);
+            name = in.readUTF();
         } catch (IOException e) {
             try {
                 client.close();
@@ -68,9 +72,9 @@ public class PlayerConnection {
      */
     public String readMessage() {
         try {
-            if (in.available() > 0) {
+            if (rawIn.available() > 0) {
                 String message = in.readUTF();
-                return name + ": " + message;
+                return message;
             }
         } catch (IOException e) {
             alive.set(false);
@@ -118,4 +122,5 @@ public class PlayerConnection {
     public void setIngame(boolean ingame) {
         this.ingame = ingame;
     }
+
 }

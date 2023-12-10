@@ -28,13 +28,12 @@ public class GameRoom {
      * @param player The PlayerConnection to add to the room.
      */
     public void addPlayer(PlayerConnection player) {
+        players.add(player);
         if(players.size() == 2){
-            players.add(player);
             player.setIngame(true);
             updateBusy();
             startgame();
         }else if(players.size() < 2){
-            players.add(player);
             player.setIngame(true);
             updateBusy();
             player.writeMessage("Waiting for another player");
