@@ -38,16 +38,16 @@ public class GameRoom {
             updateBusy();
             player.writeMessage("Waiting for another player");
         }else{ // room full
-            player.writeMessage("Room " + displayName +" full");
+            player.writeMessage(displayName + " full");
         }
     }
 
-    public void endGame(){
-        for(PlayerConnection player : players){
+    private void endGame(){
+        for (PlayerConnection player : players) {
             players.remove(player);
             player.setIngame(false);
         }
-        players.clear();
+        //players.clear();
         updateBusy();
     }
 
@@ -83,16 +83,19 @@ public class GameRoom {
         return displayName;
     }
 
-    // Additional methods as needed
     /**
-     * start game
+     * Starts the game. This method is called when the room is full.
+     * It will loop until the game is over.
      */
-    private void startgame(){
+    private boolean startgame(){
         String playerOneChoice = null;
         String playerTwoChoice = null;
+
+        PlayerConnection playerOne = players.get(0);
+        PlayerConnection playerTwo = players.get(1);
         
-        players.get(0).writeMessage("r = rock, p = paper, s = scissor");
-        players.get(1).writeMessage("r = rock, p = paper, s = scissor");
+        playerOne.writeMessage("r = rock, p = paper, s = scissor");
+        playerTwo.writeMessage("r = rock, p = paper, s = scissor");
 
         while(playerOneChoice == null){
             playerOneChoice = players.get(0).readMessage();
@@ -104,35 +107,40 @@ public class GameRoom {
 
         // Game logic for rock paper scissors
         if(playerOneChoice.equals("r") && playerTwoChoice.equals("s")){
-            players.get(0).writeMessage("You win!");
-            players.get(1).writeMessage("You lose!");
-            players.get(0).incrementScore();
-        }else if(playerOneChoice.equals("r") && playerTwoChoice.equals("p")){
-            players.get(0).writeMessage("You lose!");
-            players.get(1).writeMessage("You win!");
-            players.get(1).incrementScore();
-        }else if(playerOneChoice.equals("s") && playerTwoChoice.equals("r")){
-            players.get(0).writeMessage("You lose!");
-            players.get(1).writeMessage("You win!");
-            players.get(1).incrementScore();
-        }else if(playerOneChoice.equals("s") && playerTwoChoice.equals("p")){
-            players.get(0).writeMessage("You win!");
-            players.get(1).writeMessage("You lose!");
-            players.get(0).incrementScore();
-        }else if(playerOneChoice.equals("p") && playerTwoChoice.equals("r")){
-            players.get(0).writeMessage("You win!");
-            players.get(1).writeMessage("You lose!");
-            players.get(0).incrementScore();
-        }else if(playerOneChoice.equals("p") && playerTwoChoice.equals("s")){
-            players.get(0).writeMessage("You lose!");
-            players.get(1).writeMessage("You win!");
-            players.get(1).incrementScore();
-        }else{
-            players.get(0).writeMessage("Draw!");
-            players.get(1).writeMessage("Draw!");
+            playerOne.writeMessage("You win!");
+            playerTwo.writeMessage("You lose!");
+            playerOne.incrementScore();
+        } else if(playerOneChoice.equals("r") && playerTwoChoice.equals("p")){
+            playerOne.writeMessage("You lose!");
+            playerTwo.writeMessage("You win!");
+            playerTwo.incrementScore();
+        } else if(playerOneChoice.equals("s") && playerTwoChoice.equals("r")){
+            playerOne.writeMessage("You lose!");
+            playerTwo.writeMessage("You win!");
+            playerTwo.incrementScore();
+        } else if(playerOneChoice.equals("s") && playerTwoChoice.equals("p")){
+            playerOne.writeMessage("You win!");
+            playerTwo.writeMessage("You lose!");
+            playerOne.incrementScore();
+        } else if(playerOneChoice.equals("p") && playerTwoChoice.equals("r")){
+            playerOne.writeMessage("You win!");
+            playerTwo.writeMessage("You lose!");
+            playerOne.incrementScore();
+        } else if(playerOneChoice.equals("p") && playerTwoChoice.equals("s")){
+            playerOne.writeMessage("You lose!");
+            playerTwo.writeMessage("You win!");
+            playerTwo.incrementScore();
+        } else if (playerOneChoice.equals(playerTwoChoice)) {
+            playerOne.writeMessage("Draw!");
+            playerTwo.writeMessage("Draw!");
+        } else { // Chat
+            playerOne.writeMessage(playerTwo.getName() + ": " + playerTwoChoice);
+            playerTwo.writeMessage(playerOne.getName() + ": " + playerOneChoice);
+            return true;
         }
         
         endGame();
+        return false;
     }
 
 }

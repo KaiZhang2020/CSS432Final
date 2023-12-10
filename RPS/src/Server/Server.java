@@ -40,7 +40,9 @@ public class Server {
                         connections.add(conn);
                         System.out.println("Added connection: " + conn.getName());
                         // Send landing screen to connection: list out available players
-                        String landingMsg = "Welcome " + conn.getName() + " Please choose a player to play with" + "\n";
+                        String landingMsg = "Welcome " + conn.getName() + " Please choose a game to join" + "\n";
+                        for
+
                         for(int i = 0; i < connections.size(); i++){
                             landingMsg += "ID: " + i + " name: " + connections.get(i).getName() + "\n";
                         }
@@ -65,12 +67,14 @@ public class Server {
     /**
      * Scoreboard
      */
-    public static void generateScoreBoard() {
-        Collections.sort(connections, new PlayerScoreComparator());
-        for(PlayerConnection conn: connections){
-            System.out.println("Player: " + conn.getName()+ ": " + conn.getScore());
-            conn.writeMessage("Player: " + conn.getName()+ ": " + conn.getScore());
+    public static String generateScoreBoard() {
+        ArrayList<PlayerConnection> sortedConnections = new ArrayList<>(connections);
+        Collections.sort(sortedConnections, new PlayerScoreComparator());
+        String toSend = "";
+        for(PlayerConnection conn: sortedConnections){
+            toSend += "Player: " + conn.getName()+ ": " + conn.getScore() + "\n";
         }
+        return toSend;
     }
 
     /**
@@ -84,7 +88,7 @@ public class Server {
 
     private static void parseLobbyMessage(PlayerConnection player, String message) {
         boolean isMsgChat = false;
-        System.out.println("Checking " + player.getName());
+        //System.out.println("Checking " + player.getName());
         // Read a new message from the connection
         if (message == null) {
             return;
@@ -103,7 +107,7 @@ public class Server {
                     System.out.println("Player quit");
                     connections.remove(player);
                 } else if(roomMsg == 0){
-                    generateScoreBoard();
+                    player.writeMessage(generateScoreBoard());
                 } else{
                     isMsgChat = true;
                 }
