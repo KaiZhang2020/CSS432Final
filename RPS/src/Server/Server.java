@@ -14,11 +14,10 @@ public class Server {
      * Creates a server socket with a given port, and thereafter goes into
      * an infinite loop where:
      * <ol>
-     * <li> accept a new connection if there is one.
-     * <li> add this connection into a list of existing connections
-     * <li> for each connection, read a new message and write it to all
-     *      existing connections.
-     * <li> delete the connection if it is already disconnected.
+     * <li> Accept a new connection if there is one.
+     * <li> Add this connection into a list of existing connections
+     * <li> For each connection, run the lobby and game logic.
+     * <li> Delete the connection if it is already disconnected.
      * </ol>
      *
      * @param port an IP port
@@ -39,14 +38,8 @@ public class Server {
                         PlayerConnection conn = new PlayerConnection(client);
                         connections.add(conn);
                         System.out.println("Added connection: " + conn.getName());
-                        // Send landing screen to connection: list out available players
-                        String landingMsg = "Welcome " + conn.getName() + " Please choose a game to join" + "\n";
-                        for
 
-                        for(int i = 0; i < connections.size(); i++){
-                            landingMsg += "ID: " + i + " name: " + connections.get(i).getName() + "\n";
-                        }
-                        conn.writeMessage(landingMsg);
+                        conn.writeMessage(generateLandingMessage(conn));
                     }
                 } catch (SocketTimeoutException e) {
                     // Handle timeout exception if needed
@@ -65,9 +58,32 @@ public class Server {
     }
 
     /**
-     * Scoreboard
+     * Generate a landing message for the player.
+     * @param conn The player connection.
+     * @return A string containing the landing message.
      */
-    public static String generateScoreBoard() {
+    private String generateLandingMessage(PlayerConnection conn) {
+        String landingMsg = "Welcome " + conn.getName() + "!\nPlease choose a game to join\n";
+        // Display the number of players in each room
+        for (int i = 1; i < games.size(); i++) {
+            landingMsg += "Room " + i + ": " + games.get(i).getNumPlayers() + " players\n";
+        }
+        // Display the list of connected players
+        landingMsg += "\nHere is a list of connected players:\n";
+        for(int i = 0; i < connections.size(); i++){
+            landingMsg += "   + " + connections.get(i).getName() + "\n";
+        }
+        // Tell the user what to do
+        landingMsg += "\nType the room number to join a game, 0 to see the scoreboard, or -1 to quit.\n\n";
+
+        return landingMsg;
+    }
+
+    /**
+     * Generate a scoreboard of all the players. It is sorted by score.
+     * @return A string containing the scoreboard.
+     */
+    private static String generateScoreBoard() {
         ArrayList<PlayerConnection> sortedConnections = new ArrayList<>(connections);
         Collections.sort(sortedConnections, new PlayerScoreComparator());
         String toSend = "";
@@ -86,9 +102,15 @@ public class Server {
         }
     }
 
+    /**
+     * Parse the message from the lobby.
+     * @param player The player who sent the message.
+     * @param message The message sent by the player.
+     */
     private static void parseLobbyMessage(PlayerConnection player, String message) {
+        // Check if the message is a number
         boolean isMsgChat = false;
-        //System.out.println("Checking " + player.getName());
+
         // Read a new message from the connection
         if (message == null) {
             return;
@@ -96,7 +118,6 @@ public class Server {
             // Try to convert the message to an integer
             try {
                 int roomMsg = Integer.parseInt(message);
-                //System.out.println(roomMsg);
                 if (roomMsg >= 1 && roomMsg < MAX_GAMES) {
                     // Add the player to the game
                     games.get(roomMsg).addPlayer(player);
@@ -118,8 +139,8 @@ public class Server {
 
         if (isMsgChat) {
             // Chat function
-            for(PlayerConnection allconns:connections){
-                if(!allconns.isIngame()){
+            for (PlayerConnection allconns:connections){
+                if (!allconns.isIngame()) {
                     allconns.writeMessage(player.getName() + ": " + message);
                 }
             }

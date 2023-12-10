@@ -42,12 +42,25 @@ public class GameRoom {
         }
     }
 
+    /**
+     * Gets the number of players in the room.
+     * 
+     * @return The number of players in the room.
+     */
+    public int getNumPlayers(){
+        return players.size();
+    }
+
+    /**
+     * Removes all players from the room and marks it as not busy. It also
+     * sets the ingame status of the players to false.
+     */
     private void endGame(){
         for (PlayerConnection player : players) {
             players.remove(player);
             player.setIngame(false);
         }
-        //players.clear();
+        players.clear();
         updateBusy();
     }
 
