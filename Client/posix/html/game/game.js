@@ -55,7 +55,6 @@ document.addEventListener("mousemove", e => {
 })
 
 
-
 function isOver() {
     const rect = ball.rect
     if (rect.right >= window.innerWidth) {
